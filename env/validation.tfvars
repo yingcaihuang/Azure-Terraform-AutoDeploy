@@ -26,12 +26,12 @@ enable_dns_test_only = true
 
 # Tencent Cloud DNS 配置 (从 GitHub Secrets 覆盖，参见工作流)
 # NOTE: 这些占位符会被工作流中的实际 Secrets 值覆盖
-tencent_secret_id  = ""  # 由工作流通过 -var 参数覆盖
-tencent_secret_key = ""  # 由工作流通过 -var 参数覆盖
+tencent_secret_id  = "" # 由工作流通过 -var 参数覆盖
+tencent_secret_key = "" # 由工作流通过 -var 参数覆盖
 
 # DNS 域名配置
-dns_domain    = "gslb.vip"                    # 根域
-dns_subdomain = "dnstest"                     # 默认子域 (工作流会用 timestamp 覆盖)
+dns_domain    = "gslb.vip" # 根域
+dns_subdomain = "dnstest"  # 默认子域 (工作流会用 timestamp 覆盖)
 # NOTE: dns_subdomain 会被工作流中的 timestamp 覆盖
 # NOTE: DNS 记录值会被工作流设置为 Azure 订阅 ID
 

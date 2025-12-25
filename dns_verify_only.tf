@@ -18,7 +18,7 @@ variable "enable_dns_test_only" {
 module "dns_verify_test" {
   count               = var.enable_dns_test_only ? 1 : 0
   source              = "./modules/tencent_dns"
-  domain              = var.dns_domain     # e.g., "gslb.vip"
+  domain              = var.dns_domain    # e.g., "gslb.vip"
   sub_domain          = var.dns_subdomain # 使用工作流传入的 timestamp
   record_type         = "TXT"
   record_line         = "默认"

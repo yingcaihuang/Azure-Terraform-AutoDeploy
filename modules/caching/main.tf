@@ -1,13 +1,13 @@
 resource "azurerm_cdn_frontdoor_rule_set" "this" {
-  name                      = var.rule_set_name
-  cdn_frontdoor_profile_id  = var.profile_id
+  name                     = var.rule_set_name
+  cdn_frontdoor_profile_id = var.profile_id
 }
 
 resource "azurerm_cdn_frontdoor_rule" "jpg_cache" {
-  count                      = var.enable_jpg ? 1 : 0
-  name                       = var.jpg_rule_name
-  cdn_frontdoor_rule_set_id  = azurerm_cdn_frontdoor_rule_set.this.id
-  order                      = var.jpg_rule_order
+  count                     = var.enable_jpg ? 1 : 0
+  name                      = var.jpg_rule_name
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.this.id
+  order                     = var.jpg_rule_order
 
   actions {
     response_header_action {
@@ -28,10 +28,10 @@ resource "azurerm_cdn_frontdoor_rule" "jpg_cache" {
 }
 
 resource "azurerm_cdn_frontdoor_rule" "css_cache" {
-  count                      = var.enable_css ? 1 : 0
-  name                       = var.css_rule_name
-  cdn_frontdoor_rule_set_id  = azurerm_cdn_frontdoor_rule_set.this.id
-  order                      = var.css_rule_order
+  count                     = var.enable_css ? 1 : 0
+  name                      = var.css_rule_name
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.this.id
+  order                     = var.css_rule_order
 
   actions {
     response_header_action {
@@ -52,10 +52,10 @@ resource "azurerm_cdn_frontdoor_rule" "css_cache" {
 }
 
 resource "azurerm_cdn_frontdoor_rule" "no_cache" {
-  count                      = var.enable_nocache ? 1 : 0
-  name                       = var.nocache_rule_name
-  cdn_frontdoor_rule_set_id  = azurerm_cdn_frontdoor_rule_set.this.id
-  order                      = var.nocache_rule_order
+  count                     = var.enable_nocache ? 1 : 0
+  name                      = var.nocache_rule_name
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.this.id
+  order                     = var.nocache_rule_order
 
   actions {
     response_header_action {

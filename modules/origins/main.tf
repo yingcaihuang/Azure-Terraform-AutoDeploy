@@ -1,8 +1,8 @@
 resource "azurerm_cdn_frontdoor_origin_group" "this" {
-  name                       = var.origin_group_name
-  cdn_frontdoor_profile_id   = var.profile_id
+  name                     = var.origin_group_name
+  cdn_frontdoor_profile_id = var.profile_id
 
-  session_affinity_enabled = false
+  session_affinity_enabled                                  = false
   restore_traffic_time_to_healed_or_new_endpoint_in_minutes = 5
 
   load_balancing {
@@ -13,9 +13,9 @@ resource "azurerm_cdn_frontdoor_origin_group" "this" {
 
   health_probe {
     interval_in_seconds = 120
-    path                 = "/"
-    protocol             = "Https"
-    request_type         = "HEAD"
+    path                = "/"
+    protocol            = "Https"
+    request_type        = "HEAD"
   }
 }
 

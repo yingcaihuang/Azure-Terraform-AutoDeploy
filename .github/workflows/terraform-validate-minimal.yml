@@ -1,4 +1,4 @@
-name: Terraform Validate - Minimal RG
+name: Terraform Validate - DNS Verification
 
 on:
   push:
@@ -74,7 +74,7 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan - Validation RG
+      - name: Terraform Plan - DNS Verification
         run: |
           terraform plan \
             -var-file="env/validation.tfvars" \
@@ -116,7 +116,7 @@ jobs:
         with:
           name: tfplan
 
-      - name: Terraform Apply - Validation RG
+      - name: Terraform Apply - DNS Verification
         run: terraform apply -auto-approve tfplan
 
       - name: Show Outputs
@@ -144,10 +144,10 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Destroy - Validation RG
+      - name: Terraform Destroy - DNS Verification
         run: |
           terraform destroy \
             -var-file="env/validation.tfvars" \
             -auto-approve \
             -lock=false
-          echo "✅ 资源组已删除"
+          echo "✅ DNS 测试记录已删除"

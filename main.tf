@@ -1,17 +1,8 @@
 # ========================================
-# 最小化验证工作流 - 仅创建资源组
+# 最小化验证工作流 - DNS 验证
 # ========================================
-# 用于验证 Terraform + GitHub Actions + Azure 的完整工作流
-# 避免部署复杂的生产资源，便于快速测试和调试
+# 用于验证 Terraform + GitHub Actions + Tencent Cloud 的完整工作流
+# 使用 dns_verify_only 模块测试 DNS 配置，避免复杂资源部署
 
-resource "azurerm_resource_group" "validation" {
-  name     = var.resource_group_name
-  location = var.location
-  tags = merge(
-    var.tags,
-    {
-      Environment = "validation"
-      Purpose     = "Minimal workflow validation"
-    }
-  )
-}
+# 导入独立的 DNS 验证配置
+# 参考: dns_verify_only.tf

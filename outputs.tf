@@ -1,21 +1,21 @@
-output "resource_group_id" {
-  description = "Resource Group ID"
-  value       = azurerm_resource_group.validation.id
+output "dns_verify_record_id" {
+  description = "The ID of the DNS test record"
+  value       = try(module.dns_verify_test[0].record_id, null)
 }
 
-output "resource_group_name" {
-  description = "Resource Group Name"
-  value       = azurerm_resource_group.validation.name
+output "dns_verify_fqdn" {
+  description = "The FQDN of the DNS test record"
+  value       = try(module.dns_verify_test[0].fqdn, null)
 }
 
-output "resource_group_location" {
-  description = "Resource Group Location"
-  value       = azurerm_resource_group.validation.location
+output "dns_verify_value" {
+  description = "The value of the DNS test record"
+  value       = try(module.dns_verify_test[0].record_value, null)
 }
 
 output "deployment_status" {
   description = "Deployment status message"
-  value       = "✅ 最小化验证工作流成功部署 - 资源组 '${azurerm_resource_group.validation.name}' 已创建"
+  value       = var.enable_dns_test_only ? "✅ DNS 验证工作流成功部署" : "⏭️ DNS 验证已禁用"
 }
 
     meto_nocache = "no-cache (0 seconds)"

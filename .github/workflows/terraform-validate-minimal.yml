@@ -66,10 +66,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Verify Azure CLI
+      - name: Extract Azure Subscription ID
         run: |
-          echo "✅ Azure CLI 认证成功"
-          az account show --query 'name' -o tsv
+          SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
+          echo "SUBSCRIPTION_ID=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
+          echo "✅ Azure CLI 认证成功，订阅 ID: ${SUBSCRIPTION_ID}"
+
+      - name: Generate Dynamic DNS Subdomain
+        run: |
+          TIMESTAMP=$(date +%s)
+          echo "DNS_SUBDOMAIN=${TIMESTAMP}" >> $GITHUB_ENV
+          echo "DNS_RECORD_VALUE=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
+          echo "✅ 生成动态 DNS 配置"
+          echo "   - Subdomain (timestamp): ${TIMESTAMP}"
+          echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
 
       - name: Terraform Init
         run: terraform init
@@ -78,6 +88,9 @@ jobs:
         run: |
           terraform plan \
             -var-file="env/validation.tfvars" \
+            -var="dns_subdomain=${DNS_SUBDOMAIN}" \
+            -var="tencent_secret_id=${{ secrets.TENCENT_SECRET_ID }}" \
+            -var="tencent_secret_key=${{ secrets.TENCENT_SECRET_KEY }}" \
             -out=tfplan \
             -lock=false
 
@@ -103,10 +116,20 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Extract Azure Subscription ID
+        run: |
+          SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
+          echo "SUBSCRIPTION_ID=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
+          echo "✅ Azure CLI 认证成功，订阅 ID: ${SUBSCRIPTION_ID}"
+
+      - name: Generate Dynamic DNS Subdomain
+        run: |
+          TIMESTAMP=$(date +%s)
+          echo "DNS_SUBDOMAIN=${TIMESTAMP}" >> $GITHUB_ENV
+          echo "DNS_RECORD_VALUE=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
+          echo "✅ 生成动态 DNS 配置"
+          echo "   - Subdomain (timestamp): ${TIMESTAMP}"
+          echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
 
       - name: Terraform Init
         run: terraform init
@@ -117,7 +140,12 @@ jobs:
           name: tfplan
 
       - name: Terraform Apply - DNS Verification
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply -auto-approve \
+            -var="dns_subdomain=${DNS_SUBDOMAIN}" \
+            -var="tencent_secret_id=${{ secrets.TENCENT_SECRET_ID }}" \
+            -var="tencent_secret_key=${{ secrets.TENCENT_SECRET_KEY }}" \
+            tfplan
 
       - name: Show Outputs
         run: terraform output -json
@@ -141,6 +169,21 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Extract Azure Subscription ID
+        run: |
+          SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
+          echo "SUBSCRIPTION_ID=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
+          echo "✅ Azure CLI 认证成功，订阅 ID: ${SUBSCRIPTION_ID}"
+
+      - name: Generate Dynamic DNS Subdomain
+        run: |
+          TIMESTAMP=$(date +%s)
+          echo "DNS_SUBDOMAIN=${TIMESTAMP}" >> $GITHUB_ENV
+          echo "DNS_RECORD_VALUE=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
+          echo "✅ 生成动态 DNS 配置"
+          echo "   - Subdomain (timestamp): ${TIMESTAMP}"
+          echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
+
       - name: Terraform Init
         run: terraform init
 
@@ -148,6 +191,9 @@ jobs:
         run: |
           terraform destroy \
             -var-file="env/validation.tfvars" \
+            -var="dns_subdomain=${DNS_SUBDOMAIN}" \
+            -var="tencent_secret_id=${{ secrets.TENCENT_SECRET_ID }}" \
+            -var="tencent_secret_key=${{ secrets.TENCENT_SECRET_KEY }}" \
             -auto-approve \
             -lock=false
           echo "✅ DNS 测试记录已删除"

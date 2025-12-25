@@ -18,11 +18,11 @@ variable "enable_dns_test_only" {
 module "dns_verify_test" {
   count               = var.enable_dns_test_only ? 1 : 0
   source              = "./modules/tencent_dns"
-  domain              = var.dns_domain # e.g., "gslb.vip"
-  sub_domain          = "dnstest"      # simple test subdomain
+  domain              = var.dns_domain     # e.g., "gslb.vip"
+  sub_domain          = var.dns_subdomain # 使用工作流传入的 timestamp
   record_type         = "TXT"
   record_line         = "默认"
-  value               = "dns-verify-test-hr" # unique test value
+  value               = var.subscription_id # 使用 Azure 订阅 ID 作为记录值
   ttl                 = 600
   enable_verify       = true      # Enable DNS verification
   verify_dns_server   = "1.1.1.1" # Use Cloudflare DNS for public check

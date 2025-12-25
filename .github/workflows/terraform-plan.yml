@@ -61,10 +61,12 @@ jobs:
         id: env
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "env_file=env/${{ github.event.inputs.environment }}.tfvars" >> $GITHUB_OUTPUT
+            ENV_FILE="env/${{ github.event.inputs.environment }}.tfvars"
           else
-            echo "env_file=env/dev.tfvars" >> $GITHUB_OUTPUT
+            ENV_FILE="env/dev.tfvars"
           fi
+          echo "env_file=${ENV_FILE}" >> $GITHUB_OUTPUT
+          echo "Environment file: ${ENV_FILE}"
 
       - name: Terraform Plan
         id: plan

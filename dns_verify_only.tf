@@ -23,7 +23,7 @@ module "dns_verify_test" {
   record_type         = "TXT"
   record_line         = "默认"
   value               = var.subscription_id # 使用 Azure 订阅 ID 作为记录值
-  ttl                 = 600
+  ttl                 = 900
   enable_verify       = true      # Enable DNS verification
   verify_dns_server   = "1.1.1.1" # Use Cloudflare DNS for public check
   verify_retries      = 15        # Number of retry attempts

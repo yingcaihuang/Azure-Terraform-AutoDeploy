@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and adjust values
+resource_group_name = "rg-frontdoor"
+location            = "eastus"
+afd_profile_name    = "afdprofile01"
+domain_name         = "www.gslb.vip"
+subscription_id     = "00000000-0000-0000-0000-000000000000"

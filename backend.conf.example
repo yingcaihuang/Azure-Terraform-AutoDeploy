@@ -1,0 +1,6 @@
+# Example backend configuration for remote state in Azure Storage
+# Usage: terraform init -backend-config=backend.conf
+resource_group_name  = "rg-tfstate"
+storage_account_name = "tfstateaccount001"
+container_name       = "tfstate"
+key                  = "frontdoor/terraform.tfstate"

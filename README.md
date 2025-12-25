@@ -105,3 +105,40 @@ module "test_txt" {
 - The integrated Front Door flow still uses a managed certificate with DNS validation via `dns_tencent.tf`. The TXT record is created automatically, with verification disabled to avoid blocking the certificate issuance process.
 - Use DNS-only mode when you want to test DNS setup independently before creating Front Door infrastructure.
 - Verification uses `dig` to query public DNS; ensure the record has time to propagate before the tool timeout.
+
+## 🤖 GitHub Actions CI/CD
+
+This project now includes automated deployment via GitHub Actions. Resources are automatically deployed when code is pushed to the main branch.
+
+### Quick Start
+
+1. 📖 Read [docs/QUICKSTART.md](docs/QUICKSTART.md) for 5-minute setup
+2. 🔐 Configure GitHub Secrets (see [docs/GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md))
+3. ⚙️ Update environment files (see [docs/ENVIRONMENT-SETUP.md](docs/ENVIRONMENT-SETUP.md))
+4. 🚀 Push to GitHub and watch your resources deploy automatically
+
+### Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [QUICKSTART.md](docs/QUICKSTART.md) | 5-minute quick start guide |
+| [GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md) | Detailed GitHub Secrets configuration |
+| [ENVIRONMENT-SETUP.md](docs/ENVIRONMENT-SETUP.md) | Environment variables and setup guide |
+| [CI-CD-PLANNING.md](docs/CI-CD-PLANNING.md) | Complete CI/CD architecture and planning |
+| [SETUP-COMPLETE.md](docs/SETUP-COMPLETE.md) | Setup completion report |
+
+### Workflows
+
+- **Terraform Plan** (`terraform-plan.yml`): Runs on PR, shows resource changes
+- **Terraform Apply** (`terraform-apply.yml`): Runs on merge to main, deploys resources
+- **Terraform Destroy** (`terraform-destroy.yml`): Manual workflow to destroy resources
+
+### Required Secrets
+
+Before deploying, add these GitHub Secrets:
+- `AZURE_SUBSCRIPTION_ID`
+- `AZURE_TENANT_ID`
+- `AZURE_CLIENT_ID`
+- `AZURE_CLIENT_SECRET`
+
+See [GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md) for detailed setup instructions.

@@ -1,0 +1,95 @@
+name: Terraform Plan
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**.tf'
+      - 'env/**'
+      - '.github/workflows/terraform-plan.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to plan'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+          - dns_test
+
+permissions:
+  contents: read
+
+env:
+  TERRAFORM_VERSION: 1.6.0
+  TFDEBUG: false
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive .
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -upgrade
+        env:
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Determine Environment
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "env_file=env/${{ github.event.inputs.environment }}.tfvars" >> $GITHUB_OUTPUT
+          else
+            echo "env_file=env/dev.tfvars" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var-file="${{ steps.env.outputs.env_file }}" \
+            -no-color \
+            -out=tfplan
+        env:
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+        continue-on-error: true
+
+      - name: Create Plan Summary
+        run: |
+          terraform show -no-color tfplan > plan.txt
+          echo "### Terraform Plan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -30 plan.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Display Plan Output
+        run: terraform show -no-color tfplan

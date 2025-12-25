@@ -1,0 +1,74 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      confirmation:
+        description: 'Type "destroy" to confirm'
+        required: true
+
+permissions:
+  contents: read
+  deployments: write
+
+env:
+  TERRAFORM_VERSION: 1.6.0
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirmation == 'destroy'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -upgrade
+        env:
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Terraform Destroy
+        id: destroy
+        run: |
+          terraform destroy \
+            -var-file="env/${{ github.event.inputs.environment }}.tfvars" \
+            -auto-approve \
+            -no-color
+        env:
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+
+      - name: Create Destroy Summary
+        run: |
+          echo "## Terraform Destroy - ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Resources Destroyed Successfully**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Slack Notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Terraform Destroy: ${{ github.event.inputs.environment }} - ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true

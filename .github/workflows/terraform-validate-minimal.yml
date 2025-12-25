@@ -22,7 +22,7 @@ on:
         default: 'plan'
 
 env:
-  TERRAFORM_VERSION: '1.5.0'
+  TERRAFORM_VERSION: '1.6.0'
 
 jobs:
   validate:

@@ -33,6 +33,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Verify Azure Credentials
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "✅ Azure Login Successful"
+            az account show --query '{"subscriptionId": id, "subscriptionName": name}' -o table
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -41,11 +54,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init -upgrade
-        env:
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       - name: Terraform Validate
         id: validate
@@ -65,10 +73,6 @@ jobs:
             -no-color \
             -out=tfplan
         env:
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
           TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
 
@@ -76,8 +80,6 @@ jobs:
         id: apply
         run: |
           terraform apply -auto-approve tfplan
-        env:
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}

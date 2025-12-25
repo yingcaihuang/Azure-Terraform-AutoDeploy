@@ -2,15 +2,13 @@
 
 ## 概述
 
-GitHub Actions 工作流需要以下敏感信息作为 **Repository Secrets** 进行配置。这些敏感信息不应该被提交到版本控制中。
+GitHub Actions 工作流已集成 `azure/login` action，使用 `AZURE_CREDENTIALS` secret 进行身份验证。这是更安全、更可靠的认证方式。
 
 ## 必需的 Secrets
 
 ### Azure 认证信息
 
-为了让 GitHub Actions 能够访问 Azure 资源，需要创建一个 Azure Service Principal（服务主体）。
-
-#### 1. 创建 Azure Service Principal
+#### 1. 创建 Azure Service Principal 并生成凭证 JSON
 
 ```bash
 # 登录 Azure
@@ -19,15 +17,15 @@ az login
 # 获取你的订阅ID
 az account show --query id --output tsv
 
-# 创建 Service Principal（替换 <subscription-id> 和 <app-name>）
+# 创建 Service Principal 并输出 JSON 凭证
 az ad sp create-for-rbac \
   --name "github-terraform-sp" \
   --role Contributor \
   --scopes /subscriptions/<subscription-id> \
-  --sdk-auth
+  --json-auth
 ```
 
-输出将包含以下信息：
+输出示例：
 ```json
 {
   "clientId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -37,17 +35,15 @@ az ad sp create-for-rbac \
 }
 ```
 
-#### 2. 添加 Azure Secrets 到 GitHub
+#### 2. 添加 AZURE_CREDENTIALS Secret 到 GitHub
 
 进入你的 GitHub 仓库 → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
 
-添加以下 Secrets：
+添加以下 Secret：
 
 | Secret Name | 值 | 描述 |
 |-------------|-----|------|
-| `AZURE_SUBSCRIPTION_ID` | `subscriptionId` | Azure 订阅ID |
-| `AZURE_TENANT_ID` | `tenantId` | Azure 租户ID |
-| `AZURE_CLIENT_ID` | `clientId` | Service Principal 客户端ID |
+| `AZURE_CREDENTIALS` | 上面生成的完整 JSON（单行格式） | Azure 认证凭证 |
 | `AZURE_CLIENT_SECRET` | `clientSecret` | Service Principal 客户端密钥 |
 
 ### Tencent Cloud 认证信息（可选）

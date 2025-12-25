@@ -1,144 +1,112 @@
-# Azure Front Door + WAF via Terraform
+# Azure Terraform 自动化部署
 
-This module creates an Azure Front Door (Standard/Premium) profile with WAF, an origin pointing to `www2.myccdn.info`, and caching rules:
-- `*.jpg`: cache 30 days
-- `*.css`: cache 1 day
-- `/meto/*`: no cache
+用于在 GitHub Actions 上实现 Azure 资源的自动化部署、验证和销毁。
 
-## Prereqs
-- Terraform >= 1.6
-- AzureRM provider >= 3.65
-- Logged in via `az login` or set `ARM_*` env vars
+## 🚀 快速开始
 
-## Usage
-```bash
-terraform init
-terraform plan -var "resource_group_name=rg-frontdoor" -var "location=eastus" -var "afd_profile_name=afd-profile" -var "domain_name=www.myccdn.info"
-terraform apply
-```
-
-If Azure CLI login does not propagate the subscription in your environment, pass it explicitly:
+### 1️⃣ 生成 Azure 凭证
 
 ```bash
-terraform plan \
-  -var "resource_group_name=rg-frontdoor" \
-  -var "location=eastus" \
-  -var "afd_profile_name=afdprofile01" \
-  -var "domain_name=www.myccdn.info" \
-  -var "subscription_id=<YOUR_SUBSCRIPTION_ID>"
+az ad sp create-for-rbac \
+  --name "github-terraform-sp" \
+  --role Contributor \
+  --scopes /subscriptions/<your-id> \
+  --json-auth
 ```
 
-## Use tfvars (local state)
+### 2️⃣ 配置 GitHub Secret
 
-- Copy `terraform.tfvars.example` to `terraform.tfvars` and fill in values.
-- Default backend is local state; no Azure Storage blob required.
+GitHub → Settings → Secrets and variables → Actions → New Secret
+- Name: `AZURE_CREDENTIALS`
+- Value: 上面的 JSON 输出
 
-Run:
+### 3️⃣ 推送代码
 
 ```bash
-terraform init
-terraform plan
-terraform apply
+git add .
+git commit -m "Configure Azure deployment"
+git push origin main
 ```
 
-## Use -var-file for environments
+## 📖 文档
 
-- Dev:
+| 文档 | 用途 |
+|-----|-----|
+| [AZURE-LOGIN-UPDATE.md](AZURE-LOGIN-UPDATE.md) | 升级说明和下一步 |
+| [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md) | 快速参考和模板 |
+| [docs/AZURE-LOGIN-SETUP.md](docs/AZURE-LOGIN-SETUP.md) | Azure 凭证配置 |
+| [docs/AZURE-CLI-GITHUB-ACTIONS.md](docs/AZURE-CLI-GITHUB-ACTIONS.md) | Azure CLI 命令参考 |
+| [docs/GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md) | GitHub Secrets 配置 |
+
+## 🔄 工作流
+
+### Terraform Plan
+- **触发**：Push 到 main/develop 分支
+- **功能**：验证配置 + 生成部署计划
+- **输出**：部署计划摘要
+
+### Terraform Apply
+- **触发**：手动运行
+- **功能**：实际部署资源到 Azure
+- **输出**：部署摘要
+
+### Terraform Destroy
+- **触发**：手动运行（需要确认）
+- **功能**：销毁 Azure 资源
+- **输出**：销毁摘要
+
+## 📋 文件结构
+
+```
+.github/workflows/
+├── terraform-plan.yml
+├── terraform-apply.yml
+└── terraform-destroy.yml
+
+env/
+├── dev.tfvars
+├── prod.tfvars
+└── dns_test.tfvars
+
+docs/
+├── QUICK-REFERENCE.md
+├── AZURE-LOGIN-SETUP.md
+├── AZURE-CLI-GITHUB-ACTIONS.md
+└── GITHUB-ACTIONS-SETUP.md
+```
+
+## 🔑 环境变量
+
+**必需**：
+- `AZURE_CREDENTIALS` - Azure Service Principal 凭证
+
+**可选**：
+- `TENCENT_SECRET_ID` - Tencent Cloud 密钥
+- `TENCENT_SECRET_KEY` - Tencent Cloud 密钥
+- `SLACK_WEBHOOK` - Slack 通知
+
+## 🛠️ 常见操作
+
+### 验证 Terraform 配置
 ```bash
-terraform init
-terraform plan -var-file=env/dev.tfvars
-terraform apply -var-file=env/dev.tfvars
+terraform validate
 ```
 
-- Prod:
+### 本地 Plan
 ```bash
-terraform init
-terraform plan -var-file=env/prod.tfvars
-terraform apply -var-file=env/prod.tfvars
+terraform plan -var-file="env/dev.tfvars"
 ```
 
-Variables are defined in `variables.tf`. Adjust as needed.
+### 查看工作流日志
+GitHub → Actions → 选择工作流 → 查看运行
 
-### Standalone Tencent DNS verification (optional)
+## 📞 需要帮助？
 
-You can use the standalone module at `modules/tencent_dns` to create and verify a TXT record independently from Azure Front Door.
+查看相关文档：
+- **快速上手** → [QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md)
+- **配置凭证** → [AZURE-LOGIN-SETUP.md](docs/AZURE-LOGIN-SETUP.md)
+- **Azure CLI** → [AZURE-CLI-GITHUB-ACTIONS.md](docs/AZURE-CLI-GITHUB-ACTIONS.md)
 
-#### DNS-only mode (without creating Front Door)
+---
 
-Use the predefined environment file `env/dns_test.tfvars` which enables DNS-only mode:
-
-```bash
-terraform plan -var-file=env/dns_test.tfvars
-terraform apply -var-file=env/dns_test.tfvars
-```
-
-This will:
-1. Create a test TXT record at `dnstest.gslb.vip` with value `dns-verify-test-hr`
-2. Verify the record resolves via public DNS (Cloudflare 1.1.1.1) with retries every 10 seconds for up to 15 attempts
-3. Output the record ID and FQDN
-
-After testing, clean up:
-
-```bash
-terraform destroy -var-file=env/dns_test.tfvars
-```
-
-#### Custom DNS record in code
-
-You can also add a custom DNS record module to any `.tf` file:
-
-```hcl
-module "test_txt" {
-  source              = "./modules/tencent_dns"
-  domain              = "gslb.vip"
-  sub_domain          = "mytest"
-  value               = "my-test-value-123"
-  enable_verify       = true          # Enable DNS verification
-  verify_dns_server   = "1.1.1.1"     # optional
-  verify_retries      = 15            # optional (default 15)
-  verify_interval_sec = 10            # optional (default 10)
-}
-```
-
-#### Notes
-
-- The integrated Front Door flow still uses a managed certificate with DNS validation via `dns_tencent.tf`. The TXT record is created automatically, with verification disabled to avoid blocking the certificate issuance process.
-- Use DNS-only mode when you want to test DNS setup independently before creating Front Door infrastructure.
-- Verification uses `dig` to query public DNS; ensure the record has time to propagate before the tool timeout.
-
-## 🤖 GitHub Actions CI/CD
-
-This project now includes automated deployment via GitHub Actions. Resources are automatically deployed when code is pushed to the main branch.
-
-### Quick Start
-
-1. 📖 Read [docs/QUICKSTART.md](docs/QUICKSTART.md) for 5-minute setup
-2. 🔐 Configure GitHub Secrets (see [docs/GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md))
-3. ⚙️ Update environment files (see [docs/ENVIRONMENT-SETUP.md](docs/ENVIRONMENT-SETUP.md))
-4. 🚀 Push to GitHub and watch your resources deploy automatically
-
-### Documentation
-
-| Document | Purpose |
-|----------|---------|
-| [QUICKSTART.md](docs/QUICKSTART.md) | 5-minute quick start guide |
-| [GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md) | Detailed GitHub Secrets configuration |
-| [ENVIRONMENT-SETUP.md](docs/ENVIRONMENT-SETUP.md) | Environment variables and setup guide |
-| [CI-CD-PLANNING.md](docs/CI-CD-PLANNING.md) | Complete CI/CD architecture and planning |
-| [SETUP-COMPLETE.md](docs/SETUP-COMPLETE.md) | Setup completion report |
-
-### Workflows
-
-- **Terraform Plan** (`terraform-plan.yml`): Runs on PR, shows resource changes
-- **Terraform Apply** (`terraform-apply.yml`): Runs on merge to main, deploys resources
-- **Terraform Destroy** (`terraform-destroy.yml`): Manual workflow to destroy resources
-
-### Required Secrets
-
-Before deploying, add these GitHub Secrets:
-- `AZURE_SUBSCRIPTION_ID`
-- `AZURE_TENANT_ID`
-- `AZURE_CLIENT_ID`
-- `AZURE_CLIENT_SECRET`
-
-See [GITHUB-ACTIONS-SETUP.md](docs/GITHUB-ACTIONS-SETUP.md) for detailed setup instructions.
+**最后更新**：2025 年 12 月 25 日

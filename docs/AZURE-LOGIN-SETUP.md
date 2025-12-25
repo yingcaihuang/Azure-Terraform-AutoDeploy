@@ -23,19 +23,58 @@ GitHub Actions 工作流现已集成 `azure/login` action，用于安全地向 A
 
 如果你已安装 Azure CLI，可以使用以下命令生成凭证 JSON：
 
+#### ✅ 正确方式（输出单行 JSON）
+
 ```bash
-az ad sp create-for-rbac --name "github-actions-sp" --role Contributor --scopes /subscriptions/<subscription-id> --json-auth
+# 添加 | jq -c 确保输出单行格式
+az ad sp create-for-rbac \
+  --name "github-terraform-sp" \
+  --role Contributor \
+  --scopes /subscriptions/<subscription-id> \
+  --json-auth | jq -c
 ```
 
 **注意**：将 `<subscription-id>` 替换为你的实际 Azure 订阅 ID。
 
-输出示例：
+输出示例（单行）：
+```json
+{"clientId":"1234abcd-5678-efgh-9012-ijklmnopqrst","clientSecret":"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6","subscriptionId":"abcd1234-5678-efgh-9012-ijklmnopqrst","tenantId":"9876abcd-5432-zyxw-vuts-rqponmlkjihg"}
+```
+
+#### 📌 如果输出是多行 JSON
+
+如果命令输出是美化的多行 JSON：
+
+```bash
+# 保存到文件
+az ad sp create-for-rbac \
+  --name "github-terraform-sp" \
+  --role Contributor \
+  --scopes /subscriptions/<subscription-id> \
+  --json-auth > azure-credentials.json
+
+# 转换为单行并输出
+cat azure-credentials.json | jq -c
+```
+
+### ⚠️ 重要提示：JSON 必须是单行格式
+
+**为什么？** GitHub Secrets 不支持多行值，必须是单行 JSON。
+
+**错误症状**：如果 JSON 是多行格式，添加到 GitHub Secret 时会报错或工作流运行失败。
+
+**正确验证**：输出应该是这样的一长行：
+```
+{"clientId":"...","clientSecret":"...","subscriptionId":"...","tenantId":"..."}
+```
+
+**错误格式**（不要这样做）：
 ```json
 {
-  "clientId": "1234abcd-5678-efgh-9012-ijklmnopqrst",
-  "clientSecret": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
-  "subscriptionId": "abcd1234-5678-efgh-9012-ijklmnopqrst",
-  "tenantId": "9876abcd-5432-zyxw-vuts-rqponmlkjihg"
+  "clientId": "...",
+  "clientSecret": "...",
+  "subscriptionId": "...",
+  "tenantId": "..."
 }
 ```
 
@@ -44,7 +83,7 @@ az ad sp create-for-rbac --name "github-actions-sp" --role Contributor --scopes 
 1. 登录 [Azure 门户](https://portal.azure.com)
 2. 导航到 **Azure Active Directory** → **应用注册**
 3. 点击 **新建注册**
-4. 输入应用名称（如 "github-actions-sp"）
+4. 输入应用名称（如 "github-terraform-sp"）
 5. 点击 **注册**
 6. 在应用页面获取：
    - **Application (client) ID** → `clientId`
@@ -54,25 +93,21 @@ az ad sp create-for-rbac --name "github-actions-sp" --role Contributor --scopes 
 9. 复制密码值 → `clientSecret`
 10. 获取你的订阅 ID → `subscriptionId`
 
+   如果使用此方法，最后需要手动转换为单行 JSON：
+   ```json
+   {"clientId":"value","clientSecret":"value","subscriptionId":"value","tenantId":"value"}
+   ```
+
 ## 在 GitHub 中配置 Secret
 
-### 步骤 1：准备 JSON
+### 步骤 1：准备单行 JSON
 
-将凭证信息整理成单行 JSON：
+✅ 确保你已经得到单行 JSON（使用 `| jq -c` 或 `cat xxx.json | jq -c`）
 
-```json
-{"clientId": "1234abcd-5678-efgh-9012-ijklmnopqrst", "clientSecret": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6", "subscriptionId": "abcd1234-5678-efgh-9012-ijklmnopqrst", "tenantId": "9876abcd-5432-zyxw-vuts-rqponmlkjihg"}
+复制整个单行 JSON 字符串：
 ```
-
-### 步骤 2：添加到 GitHub Secrets
-
-1. 进入你的 GitHub 仓库
-2. 点击 **Settings** → **Secrets and variables** → **Actions**
-3. 点击 **New repository secret**
-4. 填写以下信息：
-   - **Name**: `AZURE_CREDENTIALS`
-   - **Value**: 粘贴上面的 JSON（单行格式）
-5. 点击 **Add secret**
+{"clientId":"1234abcd-5678-efgh-9012-ijklmnopqrst","clientSecret":"a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6","subscriptionId":"abcd1234-5678-efgh-9012-ijklmnopqrst","tenantId":"9876abcd-5432-zyxw-vuts-rqponmlkjihg"}
+```
 
 ## 配置流程图
 

@@ -64,15 +64,31 @@ jobs:
 
 ## GitHub Secret 配置
 
-### 生成凭证
+### 生成凭证（⚠️ 必须单行格式）
 
 ```bash
+# ✅ 推荐：直接输出单行 JSON
 az ad sp create-for-rbac \
   --name "github-terraform-sp" \
   --role Contributor \
   --scopes /subscriptions/<your-id> \
-  --json-auth
+  --json-auth | jq -c
 ```
+
+**或者保存后转换**：
+```bash
+# 保存到文件
+az ad sp create-for-rbac \
+  --name "github-terraform-sp" \
+  --role Contributor \
+  --scopes /subscriptions/<your-id> \
+  --json-auth > creds.json
+
+# 转换为单行
+cat creds.json | jq -c
+```
+
+**⚠️ 重要**：输出必须是单行格式，否则 GitHub Secrets 会报错！
 
 ### 添加到 GitHub
 

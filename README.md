@@ -11,14 +11,58 @@ az ad sp create-for-rbac \
   --name "github-terraform-sp" \
   --role Contributor \
   --scopes /subscriptions/<your-id> \
-  --json-auth
+  --json-auth | jq -c
 ```
+
+#### ⚠️ 重要提示
+
+**GitHub Secret 必须是单行 JSON 格式，否则会报错！**
+
+两种方式处理：
+
+**方式 1：直接输出单行（推荐）**
+```bash
+# 在命令末尾添加 | jq -c 自动转换为单行
+az ad sp create-for-rbac \
+  --name "github-terraform-sp" \
+  --role Contributor \
+  --scopes /subscriptions/<your-id> \
+  --json-auth | jq -c
+```
+
+**方式 2：保存后转换**
+```bash
+# 先保存到文件
+az ad sp create-for-rbac \
+  --name "github-terraform-sp" \
+  --role Contributor \
+  --scopes /subscriptions/<your-id> \
+  --json-auth > azure-credentials.json
+
+# 再转换为单行
+cat azure-credentials.json | jq -c
+```
+
+**复制输出的单行 JSON，以备下一步使用**
 
 ### 2️⃣ 配置 GitHub Secret
 
 GitHub → Settings → Secrets and variables → Actions → New Secret
-- Name: `AZURE_CREDENTIALS`
-- Value: 上面的 JSON 输出
+
+1. **Name**: `AZURE_CREDENTIALS`
+2. **Value**: 粘贴上面的单行 JSON（务必是单行格式！）
+
+✅ 正确格式：`{"clientId":"xxx","clientSecret":"xxx","subscriptionId":"xxx","tenantId":"xxx"}`
+
+❌ 错误格式（多行会报错）：
+```json
+{
+  "clientId": "xxx",
+  "clientSecret": "xxx"
+}
+```
+
+3. 点击 **Add secret** 保存
 
 ### 3️⃣ 推送代码
 

@@ -1,4 +1,4 @@
-name: Terraform Validate - DNS Verification
+name: Terraform Validate - DNS Verification (Plan + Apply + Destroy)
 
 on:
   push:
@@ -9,17 +9,10 @@ on:
       - 'variables.tf'
       - 'outputs.tf'
       - 'providers.tf'
+      - 'dns_verify_only.tf'
+      - 'modules/tencent_dns/**'
       - 'env/validation.tfvars'
       - '.github/workflows/terraform-validate-minimal.yml'
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      action:
-        description: '选择操作 (plan/apply/destroy)'
-        required: true
-        default: 'plan'
 
 env:
   TERRAFORM_VERSION: '1.6.0'
@@ -122,10 +115,9 @@ jobs:
           retention-days: 5
 
   apply:
-    name: Terraform Apply
+    name: Terraform Apply - DNS Verification
     runs-on: ubuntu-latest
     needs: plan
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
     
     steps:
       - name: Checkout code
@@ -213,9 +205,9 @@ jobs:
           terraform output -json
 
   destroy:
-    name: Terraform Destroy
+    name: Terraform Destroy - Cleanup DNS Test Record
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+    needs: apply
     
     steps:
       - name: Checkout code

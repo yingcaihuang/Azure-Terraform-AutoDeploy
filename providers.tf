@@ -18,8 +18,11 @@ provider "azurerm" {
 }
 
 provider "tencentcloud" {
-  # 凭证获取优先级：环境变量 > -var 参数 > 默认值
-  # 环境变量 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY 由 GitHub Actions 设置
-  secret_id  = var.tencent_secret_id
-  secret_key = var.tencent_secret_key
+  # 凭证获取优先级：
+  # 1. -var 参数（非空时）
+  # 2. 环境变量 TENCENTCLOUD_SECRET_ID / TENCENTCLOUD_SECRET_KEY
+  # 当 var 为空时，Terraform 会自动使用同名的环境变量
+  # 所以这里直接使用变量，让 Terraform SDK 处理环境变量降级
+  secret_id  = var.tencent_secret_id != "" ? var.tencent_secret_id : null
+  secret_key = var.tencent_secret_key != "" ? var.tencent_secret_key : null
 }

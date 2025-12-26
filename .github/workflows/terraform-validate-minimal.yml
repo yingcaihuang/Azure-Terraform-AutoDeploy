@@ -85,12 +85,16 @@ jobs:
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: terraform init
 
       - name: Debug - Check Tencent Cloud Secrets
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
             echo "❌ ERROR: Tencent Cloud secrets are not configured!"
@@ -101,12 +105,16 @@ jobs:
             echo "✅ Tencent Cloud secrets are properly configured"
             echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
             echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
+            echo "   - TF_VAR_tencent_secret_id length: ${#TF_VAR_tencent_secret_id}"
+            echo "   - TF_VAR_tencent_secret_key length: ${#TF_VAR_tencent_secret_key}"
           fi
 
       - name: Terraform Plan - DNS Verification
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           terraform plan \
             -var-file="env/validation.tfvars" \
@@ -160,12 +168,16 @@ jobs:
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: terraform init
 
       - name: Debug - Check Tencent Cloud Secrets
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
             echo "❌ ERROR: Tencent Cloud secrets are not configured!"
@@ -176,6 +188,8 @@ jobs:
             echo "✅ Tencent Cloud secrets are properly configured"
             echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
             echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
+            echo "   - TF_VAR_tencent_secret_id length: ${#TF_VAR_tencent_secret_id}"
+            echo "   - TF_VAR_tencent_secret_key length: ${#TF_VAR_tencent_secret_key}"
           fi
 
       - name: Download Plan Artifact
@@ -187,6 +201,8 @@ jobs:
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           terraform apply -auto-approve tfplan
 
@@ -231,12 +247,16 @@ jobs:
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: terraform init
 
       - name: Debug - Check Tencent Cloud Secrets
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
             echo "❌ ERROR: Tencent Cloud secrets are not configured!"
@@ -247,12 +267,16 @@ jobs:
             echo "✅ Tencent Cloud secrets are properly configured"
             echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
             echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
+            echo "   - TF_VAR_tencent_secret_id length: ${#TF_VAR_tencent_secret_id}"
+            echo "   - TF_VAR_tencent_secret_key length: ${#TF_VAR_tencent_secret_key}"
           fi
 
       - name: Terraform Destroy - DNS Verification
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          TF_VAR_tencent_secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          TF_VAR_tencent_secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           terraform destroy \
             -var-file="env/validation.tfvars" \

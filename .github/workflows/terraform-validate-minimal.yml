@@ -84,6 +84,22 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Debug - Check Tencent Cloud Secrets
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+        run: |
+          if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
+            echo "❌ ERROR: Tencent Cloud secrets are not configured!"
+            echo "   - TENCENT_SECRET_ID: $([ -z "$TENCENTCLOUD_SECRET_ID" ] && echo 'NOT SET' || echo '✅ SET')"
+            echo "   - TENCENT_SECRET_KEY: $([ -z "$TENCENTCLOUD_SECRET_KEY" ] && echo 'NOT SET' || echo '✅ SET')"
+            exit 1
+          else
+            echo "✅ Tencent Cloud secrets are properly configured"
+            echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
+            echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
+          fi
+
       - name: Terraform Plan - DNS Verification
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
@@ -134,6 +150,22 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+
+      - name: Debug - Check Tencent Cloud Secrets
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+        run: |
+          if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
+            echo "❌ ERROR: Tencent Cloud secrets are not configured!"
+            echo "   - TENCENT_SECRET_ID: $([ -z "$TENCENTCLOUD_SECRET_ID" ] && echo 'NOT SET' || echo '✅ SET')"
+            echo "   - TENCENT_SECRET_KEY: $([ -z "$TENCENTCLOUD_SECRET_KEY" ] && echo 'NOT SET' || echo '✅ SET')"
+            exit 1
+          else
+            echo "✅ Tencent Cloud secrets are properly configured"
+            echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
+            echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
+          fi
 
       - name: Download Plan Artifact
         uses: actions/download-artifact@v4
@@ -186,6 +218,22 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+
+      - name: Debug - Check Tencent Cloud Secrets
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+        run: |
+          if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
+            echo "❌ ERROR: Tencent Cloud secrets are not configured!"
+            echo "   - TENCENT_SECRET_ID: $([ -z "$TENCENTCLOUD_SECRET_ID" ] && echo 'NOT SET' || echo '✅ SET')"
+            echo "   - TENCENT_SECRET_KEY: $([ -z "$TENCENTCLOUD_SECRET_KEY" ] && echo 'NOT SET' || echo '✅ SET')"
+            exit 1
+          else
+            echo "✅ Tencent Cloud secrets are properly configured"
+            echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
+            echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
+          fi
 
       - name: Terraform Destroy - DNS Verification
         env:

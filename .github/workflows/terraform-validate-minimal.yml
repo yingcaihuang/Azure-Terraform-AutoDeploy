@@ -85,6 +85,9 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan - DNS Verification
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           terraform plan \
             -var-file="env/validation.tfvars" \
@@ -140,6 +143,9 @@ jobs:
           name: tfplan
 
       - name: Terraform Apply - DNS Verification
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           terraform apply -auto-approve \
             -var="dns_subdomain=${DNS_SUBDOMAIN}" \
@@ -188,6 +194,9 @@ jobs:
         run: terraform init
 
       - name: Terraform Destroy - DNS Verification
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
           terraform destroy \
             -var-file="env/validation.tfvars" \

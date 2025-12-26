@@ -18,6 +18,7 @@ provider "azurerm" {
 }
 
 provider "tencentcloud" {
+  # 从变量读取，或从环境变量 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY 读取
   secret_id  = var.tencent_secret_id
   secret_key = var.tencent_secret_key
 }

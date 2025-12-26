@@ -136,6 +136,11 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
+      - name: Clean Terraform State
+        run: |
+          rm -f terraform.tfstate* .terraform.lock.hcl
+          echo "✅ Cleaned terraform state files"
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -220,6 +225,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Clean Terraform State
+        run: |
+          rm -f terraform.tfstate* .terraform.lock.hcl
+          echo "✅ Cleaned terraform state files"
 
       - name: Azure Login
         uses: azure/login@v2

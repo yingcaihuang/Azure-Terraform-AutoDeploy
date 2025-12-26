@@ -82,6 +82,9 @@ jobs:
           echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
 
       - name: Terraform Init
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: terraform init
 
       - name: Debug - Check Tencent Cloud Secrets
@@ -133,6 +136,11 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Extract Azure Subscription ID
         run: |
           SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
@@ -149,6 +157,9 @@ jobs:
           echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
 
       - name: Terraform Init
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: terraform init
 
       - name: Debug - Check Tencent Cloud Secrets
@@ -217,6 +228,9 @@ jobs:
           echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
 
       - name: Terraform Init
+        env:
+          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: terraform init
 
       - name: Debug - Check Tencent Cloud Secrets

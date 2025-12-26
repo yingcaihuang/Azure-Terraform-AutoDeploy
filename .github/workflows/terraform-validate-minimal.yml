@@ -41,7 +41,7 @@ jobs:
         run: terraform validate
 
   plan:
-    name: Terraform Plan
+    name: Terraform Plan + Apply - DNS Verification
     runs-on: ubuntu-latest
     needs: validate
     
@@ -107,107 +107,24 @@ jobs:
             -out=tfplan \
             -lock=false
 
-      - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: tfplan
-          retention-days: 5
-
-  apply:
-    name: Terraform Apply - DNS Verification
-    runs-on: ubuntu-latest
-    needs: plan
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: Clean Terraform State
-        run: |
-          rm -f terraform.tfstate* .terraform.lock.hcl
-          echo "✅ Cleaned terraform state files"
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Extract Azure Subscription ID
-        run: |
-          SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)
-          echo "SUBSCRIPTION_ID=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
-          echo "✅ Azure CLI 认证成功，订阅 ID: ${SUBSCRIPTION_ID}"
-
-      - name: Generate Dynamic DNS Subdomain
-        run: |
-          TIMESTAMP=$(date +%s)
-          echo "DNS_SUBDOMAIN=${TIMESTAMP}" >> $GITHUB_ENV
-          echo "DNS_RECORD_VALUE=${SUBSCRIPTION_ID}" >> $GITHUB_ENV
-          echo "✅ 生成动态 DNS 配置"
-          echo "   - Subdomain (timestamp): ${TIMESTAMP}"
-          echo "   - Record Value (subscription ID): ${SUBSCRIPTION_ID}"
-
-      - name: Terraform Init
-        env:
-          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
-          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
-        run: terraform init
-
-      - name: Debug - Check Tencent Cloud Secrets
-        env:
-          TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
-          TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
-        run: |
-          if [ -z "$TENCENTCLOUD_SECRET_ID" ] || [ -z "$TENCENTCLOUD_SECRET_KEY" ]; then
-            echo "❌ ERROR: Tencent Cloud secrets are not configured!"
-            echo "   - TENCENT_SECRET_ID: $([ -z "$TENCENTCLOUD_SECRET_ID" ] && echo 'NOT SET' || echo '✅ SET')"
-            echo "   - TENCENT_SECRET_KEY: $([ -z "$TENCENTCLOUD_SECRET_KEY" ] && echo 'NOT SET' || echo '✅ SET')"
-            exit 1
-          else
-            echo "✅ Tencent Cloud secrets are properly configured"
-            echo "   - Secret ID length: ${#TENCENTCLOUD_SECRET_ID}"
-            echo "   - Secret Key length: ${#TENCENTCLOUD_SECRET_KEY}"
-          fi
-
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-
-      - name: Verify Plan File
-        run: |
-          if [ ! -f tfplan ]; then
-            echo "❌ ERROR: tfplan file not found!"
-            ls -la
-            exit 1
-          fi
-          echo "✅ tfplan file found"
-          file tfplan
-
       - name: Terraform Apply - DNS Verification
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
-          echo "📋 Starting terraform apply with saved plan..."
+          echo "📋 Starting terraform apply..."
           terraform apply -auto-approve tfplan
+          echo "✅ Terraform apply completed successfully"
 
       - name: Show Outputs
         run: |
-          echo "✅ Terraform apply completed successfully"
-          echo "📊 Final outputs:"
+          echo "📊 Final outputs after apply:"
           terraform output -json
 
   destroy:
     name: Terraform Destroy - Cleanup DNS Test Record
     runs-on: ubuntu-latest
-    needs: apply
+    needs: plan
     
     steps:
       - name: Checkout code

@@ -18,7 +18,8 @@ provider "azurerm" {
 }
 
 provider "tencentcloud" {
-  # 从变量读取，或从环境变量 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY 读取
-  secret_id  = var.tencent_secret_id
-  secret_key = var.tencent_secret_key
+  # 优先使用环境变量 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY
+  # 若环境变量未设置，则使用 Terraform 变量（来自 -var 参数或 tfvars 文件）
+  secret_id  = var.tencent_secret_id != "" ? var.tencent_secret_id : null
+  secret_key = var.tencent_secret_key != "" ? var.tencent_secret_key : null
 }

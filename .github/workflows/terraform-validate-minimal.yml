@@ -92,8 +92,6 @@ jobs:
           terraform plan \
             -var-file="env/validation.tfvars" \
             -var="dns_subdomain=${DNS_SUBDOMAIN}" \
-            -var="tencent_secret_id=${{ secrets.TENCENT_SECRET_ID }}" \
-            -var="tencent_secret_key=${{ secrets.TENCENT_SECRET_KEY }}" \
             -out=tfplan \
             -lock=false
 
@@ -147,11 +145,7 @@ jobs:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
-          terraform apply -auto-approve \
-            -var="dns_subdomain=${DNS_SUBDOMAIN}" \
-            -var="tencent_secret_id=${{ secrets.TENCENT_SECRET_ID }}" \
-            -var="tencent_secret_key=${{ secrets.TENCENT_SECRET_KEY }}" \
-            tfplan
+          terraform apply -auto-approve tfplan
 
       - name: Show Outputs
         run: terraform output -json
@@ -201,8 +195,6 @@ jobs:
           terraform destroy \
             -var-file="env/validation.tfvars" \
             -var="dns_subdomain=${DNS_SUBDOMAIN}" \
-            -var="tencent_secret_id=${{ secrets.TENCENT_SECRET_ID }}" \
-            -var="tencent_secret_key=${{ secrets.TENCENT_SECRET_KEY }}" \
             -auto-approve \
             -lock=false
           echo "✅ DNS 测试记录已删除"

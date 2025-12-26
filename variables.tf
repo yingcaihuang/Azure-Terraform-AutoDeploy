@@ -31,14 +31,16 @@ variable "subscription_id" {
 
 variable "tencent_secret_id" {
   type        = string
-  description = "Tencent Cloud SecretId for DNSPod API"
-  default     = null
+  description = "Tencent Cloud SecretId for DNSPod API (从环境变量 TENCENTCLOUD_SECRET_ID 读取)"
+  default     = ""
+  sensitive   = true
 }
 
 variable "tencent_secret_key" {
   type        = string
-  description = "Tencent Cloud SecretKey for DNSPod API"
-  default     = null
+  description = "Tencent Cloud SecretKey for DNSPod API (从环境变量 TENCENTCLOUD_SECRET_KEY 读取)"
+  default     = ""
+  sensitive   = true
 }
 
 variable "dns_domain" {

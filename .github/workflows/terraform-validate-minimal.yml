@@ -183,15 +183,29 @@ jobs:
         with:
           name: tfplan
 
+      - name: Verify Plan File
+        run: |
+          if [ ! -f tfplan ]; then
+            echo "❌ ERROR: tfplan file not found!"
+            ls -la
+            exit 1
+          fi
+          echo "✅ tfplan file found"
+          file tfplan
+
       - name: Terraform Apply - DNS Verification
         env:
           TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
         run: |
+          echo "📋 Starting terraform apply with saved plan..."
           terraform apply -auto-approve tfplan
 
       - name: Show Outputs
-        run: terraform output -json
+        run: |
+          echo "✅ Terraform apply completed successfully"
+          echo "📊 Final outputs:"
+          terraform output -json
 
   destroy:
     name: Terraform Destroy
